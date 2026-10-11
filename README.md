@@ -41,4 +41,6 @@ python3 tools/build_package.py data/bulusma_onerileri.sqlite docs <dokum-tarihi>
 
 ## Lisans ve atıf
 
-Veri © [OpenStreetMap katkıcıları](https://www.openstreetmap.org/copyright), [Open Database License (ODbL) 1.0](https://opendatacommons.org/licenses/odbl/1-0/) ile sunulur. Bu depodaki türetilmiş veri de ODbL kapsamındadır. Kullanan uygulama ve sayfalar "© OpenStreetMap katkıcıları" atfını göstermelidir.
+**Kod** (`tools/` altındaki betikler ve `docs/index.html`): [GNU General Public License v3.0](LICENSE).
+
+**Veri** (`docs/manifest.json` ve `docs/il/` altı): © [OpenStreetMap katkıcıları](https://www.openstreetmap.org/copyright), [Open Database License (ODbL) 1.0](https://opendatacommons.org/licenses/odbl/1-0/). Bu depodaki türetilmiş veri de ODbL kapsamındadır; kullanan uygulama ve sayfalar "© OpenStreetMap katkıcıları" atfını göstermelidir.
