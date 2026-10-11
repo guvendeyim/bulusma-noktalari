@@ -15,18 +15,20 @@ Bu liste OpenStreetMap verisinden otomatik üretilmiş **öneridir**; resmi bir 
 |---|---|
 | `surum` | Kaynak OSM dökümünün tarihi |
 | `min_m2` | Pakete alınan en küçük alan |
-| `alanlar` | İlçe dosyalarındaki sütun sırası |
+| `bicim` | `geojson` |
 | `ilceler[]` | `il`, `ilce`, `dosya`, `boyut`, `sha256`, `kayit`, `kutu` |
 
 `kutu` = `[min_lat, min_lng, max_lat, max_lng]` (WGS84). Uygulama, konumun çevresindeki kutularla kesişen ilçe dosyalarını indirir.
 
-`docs/il/<il>/<ilce>.json` — her satır bir öneri:
+`docs/il/<il>/<ilce>.geojson` — GeoJSON `FeatureCollection`; her öneri bir `Point`:
 
 ```json
-["w177436492", "park", 1, "Özgürlük Parkı", 40.97931, 29.05642, 102081]
+{"type":"Feature","id":"w177436492",
+ "geometry":{"type":"Point","coordinates":[29.05642,40.97931]},
+ "properties":{"tur":"park","oncelik":1,"ad":"Özgürlük Parkı","m2":102081}}
 ```
 
-Sıra: `osm_id, tur, oncelik, ad, lat, lng, m2`. `ad` boş (`null`) olabilir. Türler ve öncelik: `park` 1, `meydan` 1, `pazar_yeri` 2, `spor_sahasi` 3, `oyun_alani` 4. Bir parkın içinde kalan spor sahası ve oyun alanları ayrıca listelenmez.
+Koordinat sırası GeoJSON kuralıyla **boylam, enlem**dir. `ad` boş (`null`) olabilir. Türler ve öncelik: `park` 1, `meydan` 1, `pazar_yeri` 2, `spor_sahasi` 3, `oyun_alani` 4. Bir parkın içinde kalan spor sahası ve oyun alanları ayrıca listelenmez. Dosyada öneriler önceliğe, sonra alana göre sıralıdır.
 
 ## Yeniden üretme
 

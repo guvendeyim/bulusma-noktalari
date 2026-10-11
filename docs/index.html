@@ -86,7 +86,8 @@ $("ilce").onchange = async () => {
   const dosya = $("ilce").value;
   if (!dosya) return;
   $("durum").textContent = "Yükleniyor…";
-  const kayitlar = await fetch(dosya).then((r) => r.json());
+  const kayitlar = (await fetch(dosya).then((r) => r.json())).features
+    .map((f) => [f.id, f.properties.tur, f.properties.oncelik, f.properties.ad, f.geometry.coordinates[1], f.geometry.coordinates[0], f.properties.m2]);
   $("liste").replaceChildren();
   isaretler.clearLayers();
   for (const [id, tur, , ad, lat, lng, m2] of kayitlar) {

@@ -4,7 +4,8 @@ Kullanım: python3 tools/build_package.py data/bulusma_onerileri.sqlite docs 202
 
 Çıktı:
   docs/manifest.json               sürüm, alan sırası, ilçe listesi (dosya, boyut, sha256, kayıt, kutu)
-  docs/il/<il>/<ilce>.json         [[osm_id, tur, oncelik, ad, lat, lng, m2], ...]
+  docs/il/<il>/<ilce>.geojson      GeoJSON FeatureCollection; her öneri bir Point,
+                                   properties: tur, oncelik, ad, m2; id: OSM kimliği
 Dosyalar düz JSON'dur; sıkıştırmayı sunucu (GitHub Pages) aktarım sırasında yapar.
 Uygulama ilçeyi adından değil kutusundan (min_lat, min_lng, max_lat, max_lng) bulur: konumun
 çevresindeki kutularla kesişen ilçe dosyalarını indirir; böylece ilçe sınırındaki kullanıcı komşu
@@ -17,7 +18,6 @@ import os
 import sqlite3
 import sys
 
-ALANLAR = ["osm_id", "tur", "oncelik", "ad", "lat", "lng", "m2"]
 ILCESIZ = "diger"
 
 
@@ -38,8 +38,19 @@ def main(db_path, out_dir, surum, min_m2=500):
 
     ilceler = []
     for (il, ilce), kayitlar in gruplar.items():
-        paket = json.dumps(kayitlar, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
-        dosya = f"il/{slug(il)}/{slug(ilce)}.json"
+        # GeoJSON koordinat sırası boylam, enlem'dir.
+        ozellikler = [
+            {
+                "type": "Feature",
+                "id": osm_id,
+                "geometry": {"type": "Point", "coordinates": [lng, lat]},
+                "properties": {"tur": tur, "oncelik": oncelik, "ad": ad, "m2": m2},
+            }
+            for osm_id, tur, oncelik, ad, lat, lng, m2 in kayitlar
+        ]
+        koleksiyon = {"type": "FeatureCollection", "features": ozellikler}
+        paket = json.dumps(koleksiyon, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+        dosya = f"il/{slug(il)}/{slug(ilce)}.geojson"
         hedef = os.path.join(out_dir, dosya)
         os.makedirs(os.path.dirname(hedef), exist_ok=True)
         with open(hedef, "wb") as f:
@@ -57,7 +68,7 @@ def main(db_path, out_dir, surum, min_m2=500):
     manifest = {
         "surum": surum,
         "min_m2": min_m2,
-        "alanlar": ALANLAR,
+        "bicim": "geojson",
         "atif": "© OpenStreetMap katkıcıları (ODbL)",
         "ilceler": ilceler,
     }
