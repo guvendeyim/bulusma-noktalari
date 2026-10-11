@@ -2,8 +2,8 @@
 
 Güvendeyim uygulamasının "buluşma noktası" modülü için açık alan önerileri: Türkiye genelinde park, meydan, pazar yeri, spor sahası ve oyun alanları.
 
-- Sayfa: https://guvendeyim.github.io/bulusma-noktalari/
-- Veri: https://guvendeyim.github.io/bulusma-noktalari/manifest.json
+- Sayfa: https://guvendeyim.org.tr/bulusma-noktalari/
+- Veri: https://guvendeyim.org.tr/bulusma-noktalari/manifest.json
 
 Bu liste OpenStreetMap verisinden otomatik üretilmiş **öneridir**; resmi bir belirleme ya da güvenlik garantisi değildir.
 
