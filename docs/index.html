@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buluşma Noktası Önerileri</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+  :root { --ana: #CE0539; --metin: #1c1c1e; --soluk: #6b6b70; --cizgi: #e3e3e6; --zemin: #fff; --kart: #f6f6f7; }
+  @media (prefers-color-scheme: dark) {
+    :root { --metin: #f2f2f3; --soluk: #a0a0a6; --cizgi: #38383c; --zemin: #151517; --kart: #202023; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 16px/1.45 system-ui, sans-serif; color: var(--metin); background: var(--zemin); }
+  header { background: var(--ana); color: #fff; padding: 16px; }
+  header h1 { margin: 0; font-size: 20px; }
+  header p { margin: 4px 0 0; font-size: 14px; opacity: .9; }
+  main { max-width: 960px; margin: 0 auto; padding: 16px; }
+  .secim { display: flex; gap: 8px; flex-wrap: wrap; }
+  select { flex: 1 1 160px; padding: 10px; font: inherit; color: inherit; background: var(--kart); border: 1px solid var(--cizgi); border-radius: 8px; }
+  #harita { height: 340px; margin: 16px 0; border-radius: 8px; border: 1px solid var(--cizgi); }
+  #durum { color: var(--soluk); font-size: 14px; margin: 12px 0; }
+  ul { list-style: none; margin: 0; padding: 0; }
+  li { padding: 12px 0; border-bottom: 1px solid var(--cizgi); display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+  li small { color: var(--soluk); display: block; }
+  a { color: var(--ana); }
+  .not { background: var(--kart); border-radius: 8px; padding: 12px; font-size: 14px; margin-top: 24px; }
+  footer { color: var(--soluk); font-size: 13px; padding: 24px 16px; text-align: center; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Buluşma Noktası Önerileri</h1>
+  <p>Afet sonrası ailenizle buluşabileceğiniz açık alanlar</p>
+</header>
+<main>
+  <div class="secim">
+    <select id="il" aria-label="İl"><option value="">İl seçin</option></select>
+    <select id="ilce" aria-label="İlçe" disabled><option value="">İlçe seçin</option></select>
+  </div>
+  <div id="harita"></div>
+  <div id="durum">Veri yükleniyor…</div>
+  <ul id="liste"></ul>
+  <div class="not">
+    Bu liste haritadaki park, meydan, pazar yeri, spor sahası ve oyun alanlarından otomatik üretilmiş
+    <strong>öneridir</strong>; resmi bir belirleme ya da güvenlik garantisi değildir. Seçtiğiniz yerin
+    binalardan uzak, açık ve ailenizin yürüyerek ulaşabileceği bir yer olduğunu kendiniz görün.
+    İki nokta belirleyin: biri asıl, biri yedek.
+  </div>
+</main>
+<footer>
+  Veri © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap katkıcıları</a> (ODbL) ·
+  <span id="surum"></span> · <a href="manifest.json">manifest.json</a>
+</footer>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const TUR = { park: "Park", meydan: "Meydan", pazar_yeri: "Pazar yeri", spor_sahasi: "Spor sahası", oyun_alani: "Oyun alanı" };
+const $ = (id) => document.getElementById(id);
+const tr = new Intl.Collator("tr");
+const sayi = new Intl.NumberFormat("tr");
+
+const harita = L.map("harita").setView([39, 35], 5);
+L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  maxZoom: 19, attribution: "© OpenStreetMap katkıcıları",
+}).addTo(harita);
+const isaretler = L.layerGroup().addTo(harita);
+
+let ilceler = [];
+
+fetch("manifest.json").then((r) => r.json()).then((m) => {
+  ilceler = m.ilceler;
+  $("surum").textContent = "Sürüm " + m.surum + " · en az " + m.min_m2 + " m²";
+  [...new Set(ilceler.map((i) => i.il))].sort(tr.compare).forEach((il) => $("il").add(new Option(il, il)));
+  $("durum").textContent = sayi.format(ilceler.reduce((t, i) => t + i.kayit, 0)) + " öneri, " + ilceler.length + " ilçe. İl ve ilçe seçin.";
+}).catch(() => { $("durum").textContent = "Veri yüklenemedi."; });
+
+$("il").onchange = () => {
+  const secim = $("ilce");
+  secim.length = 1;
+  ilceler.filter((i) => i.il === $("il").value).sort((a, b) => tr.compare(a.ilce, b.ilce))
+    .forEach((i) => secim.add(new Option(i.ilce + " (" + i.kayit + ")", i.dosya)));
+  secim.disabled = secim.length === 1;
+};
+
+$("ilce").onchange = async () => {
+  const dosya = $("ilce").value;
+  if (!dosya) return;
+  $("durum").textContent = "Yükleniyor…";
+  const kayitlar = await fetch(dosya).then((r) => r.json());
+  $("liste").replaceChildren();
+  isaretler.clearLayers();
+  for (const [id, tur, , ad, lat, lng, m2] of kayitlar) {
+    const baslik = ad || "Adsız " + TUR[tur].toLocaleLowerCase("tr");
+    const satir = document.createElement("li");
+    const sol = document.createElement("div");
+    sol.textContent = baslik;
+    const alt = document.createElement("small");
+    alt.textContent = TUR[tur] + " · " + sayi.format(m2) + " m²";
+    sol.append(alt);
+    const bag = document.createElement("a");
+    bag.href = "geo:" + lat + "," + lng + "?q=" + lat + "," + lng;
+    bag.textContent = "Haritada aç";
+    bag.onclick = (e) => { e.preventDefault(); harita.setView([lat, lng], 17); window.scrollTo({ top: 0, behavior: "smooth" }); };
+    satir.append(sol, bag);
+    $("liste").append(satir);
+    L.circleMarker([lat, lng], { radius: 6, color: "#CE0539" }).bindPopup(baslik).addTo(isaretler);
+  }
+  harita.fitBounds(kayitlar.map((k) => [k[4], k[5]]), { padding: [24, 24], maxZoom: 16 });
+  $("durum").textContent = kayitlar.length + " öneri";
+};
+</script>
+</body>
+</html>
