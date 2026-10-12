@@ -1,0 +1,89 @@
+<!--
+  Buluşma noktası önerileri sayfasının gövdesi. Üst menü, alt bilgi ve biçimler tanıtım sitesinden gelir:
+  guvendeyim.github.io deposundaki build.py bu dosyayı okuyup docs/index.html dosyasını üretir.
+  docs/index.html elle düzenlenmez.
+-->
+<main>
+<div class="sayfa-basi"><div class="ic">
+  <h1>Buluşma noktası önerileri</h1>
+  <p>Afet sonrası ailenizle buluşabileceğiniz açık alanlar. İl ve ilçe seçip haritada görün.</p>
+</div></div>
+<section><div class="ic">
+  <div class="secim">
+    <select id="il" aria-label="İl"><option value="">İl seçin</option></select>
+    <select id="ilce" aria-label="İlçe" disabled><option value="">İlçe seçin</option></select>
+  </div>
+  <div id="harita"></div>
+  <p id="durum" class="durum">Veri yükleniyor…</p>
+  <ul id="liste" class="oneriler"></ul>
+  <p class="uyari">
+    Bu liste haritadaki park, meydan, pazar yeri, spor sahası ve oyun alanlarından otomatik üretilmiş
+    <strong>öneridir</strong>; resmi bir belirleme ya da güvenlik garantisi değildir. Seçtiğiniz yerin
+    binalardan uzak, açık ve ailenizin yürüyerek ulaşabileceği bir yer olduğunu kendiniz görün.
+    İki nokta belirleyin: biri asıl, biri yedek.
+  </p>
+  <p class="kaynak">
+    Veri © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap katkıcıları</a> (ODbL) ·
+    <span id="surum"></span> · <a href="manifest.json">manifest.json</a> ·
+    <a href="https://github.com/guvendeyim/bulusma-noktalari">Kaynak ve biçim</a>
+  </p>
+</div></section>
+</main>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const TUR = { park: "Park", meydan: "Meydan", pazar_yeri: "Pazar yeri", spor_sahasi: "Spor sahası", oyun_alani: "Oyun alanı" };
+const $ = (id) => document.getElementById(id);
+const tr = new Intl.Collator("tr");
+const sayi = new Intl.NumberFormat("tr");
+
+const harita = L.map("harita").setView([39, 35], 5);
+L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  maxZoom: 19, attribution: "© OpenStreetMap katkıcıları",
+}).addTo(harita);
+const isaretler = L.layerGroup().addTo(harita);
+
+let ilceler = [];
+
+fetch("manifest.json").then((r) => r.json()).then((m) => {
+  ilceler = m.ilceler;
+  $("surum").textContent = "Sürüm " + m.surum + " · en az " + m.min_m2 + " m²";
+  [...new Set(ilceler.map((i) => i.il))].sort(tr.compare).forEach((il) => $("il").add(new Option(il, il)));
+  $("durum").textContent = sayi.format(ilceler.reduce((t, i) => t + i.kayit, 0)) + " öneri, " + ilceler.length + " ilçe. İl ve ilçe seçin.";
+}).catch(() => { $("durum").textContent = "Veri yüklenemedi."; });
+
+$("il").onchange = () => {
+  const secim = $("ilce");
+  secim.length = 1;
+  ilceler.filter((i) => i.il === $("il").value).sort((a, b) => tr.compare(a.ilce, b.ilce))
+    .forEach((i) => secim.add(new Option(i.ilce + " (" + i.kayit + ")", i.dosya)));
+  secim.disabled = secim.length === 1;
+};
+
+$("ilce").onchange = async () => {
+  const dosya = $("ilce").value;
+  if (!dosya) return;
+  $("durum").textContent = "Yükleniyor…";
+  const kayitlar = (await fetch(dosya).then((r) => r.json())).features
+    .map((f) => [f.id, f.properties.tur, f.properties.oncelik, f.properties.ad, f.geometry.coordinates[1], f.geometry.coordinates[0], f.properties.m2]);
+  $("liste").replaceChildren();
+  isaretler.clearLayers();
+  for (const [id, tur, , ad, lat, lng, m2] of kayitlar) {
+    const baslik = ad || "Adsız " + TUR[tur].toLocaleLowerCase("tr");
+    const satir = document.createElement("li");
+    const sol = document.createElement("div");
+    sol.textContent = baslik;
+    const alt = document.createElement("small");
+    alt.textContent = TUR[tur] + " · " + sayi.format(m2) + " m²";
+    sol.append(alt);
+    const bag = document.createElement("a");
+    bag.href = "geo:" + lat + "," + lng + "?q=" + lat + "," + lng;
+    bag.textContent = "Haritada aç";
+    bag.onclick = (e) => { e.preventDefault(); harita.setView([lat, lng], 17); $("harita").scrollIntoView({ behavior: "smooth", block: "center" }); };
+    satir.append(sol, bag);
+    $("liste").append(satir);
+    L.circleMarker([lat, lng], { radius: 6, color: "#CE0539" }).bindPopup(baslik).addTo(isaretler);
+  }
+  harita.fitBounds(kayitlar.map((k) => [k[4], k[5]]), { padding: [24, 24], maxZoom: 16 });
+  $("durum").textContent = kayitlar.length + " öneri";
+};
+</script>

@@ -1,57 +1,56 @@
 <!doctype html>
-<html lang="tr">
+<html lang="tr" class="betiksiz">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Buluşma Noktası Önerileri</title>
+<title>Buluşma noktası önerileri — Güvendeyim</title>
+<meta name="description" content="Afet sonrası ailenizle buluşabileceğiniz açık alanlar: il ve ilçeye göre park, meydan, pazar yeri, spor sahası ve oyun alanı önerileri.">
+<meta property="og:title" content="Buluşma noktası önerileri — Güvendeyim">
+<meta property="og:description" content="Afet sonrası ailenizle buluşabileceğiniz açık alanlar: il ve ilçeye göre park, meydan, pazar yeri, spor sahası ve oyun alanı önerileri.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://www.guvendeyim.org.tr/img/icon.png">
+<link rel="icon" type="image/png" href="/img/favicon.png">
+<link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+<link rel="stylesheet" href="/css/site.css?v=5da54194">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<style>
-  :root { --ana: #CE0539; --metin: #1c1c1e; --soluk: #6b6b70; --cizgi: #e3e3e6; --zemin: #fff; --kart: #f6f6f7; }
-  @media (prefers-color-scheme: dark) {
-    :root { --metin: #f2f2f3; --soluk: #a0a0a6; --cizgi: #38383c; --zemin: #151517; --kart: #202023; }
-  }
-  * { box-sizing: border-box; }
-  body { margin: 0; font: 16px/1.45 system-ui, sans-serif; color: var(--metin); background: var(--zemin); }
-  header { background: var(--ana); color: #fff; padding: 16px; }
-  header h1 { margin: 0; font-size: 20px; }
-  header p { margin: 4px 0 0; font-size: 14px; opacity: .9; }
-  main { max-width: 960px; margin: 0 auto; padding: 16px; }
-  .secim { display: flex; gap: 8px; flex-wrap: wrap; }
-  select { flex: 1 1 160px; padding: 10px; font: inherit; color: inherit; background: var(--kart); border: 1px solid var(--cizgi); border-radius: 8px; }
-  #harita { height: 340px; margin: 16px 0; border-radius: 8px; border: 1px solid var(--cizgi); }
-  #durum { color: var(--soluk); font-size: 14px; margin: 12px 0; }
-  ul { list-style: none; margin: 0; padding: 0; }
-  li { padding: 12px 0; border-bottom: 1px solid var(--cizgi); display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
-  li small { color: var(--soluk); display: block; }
-  a { color: var(--ana); }
-  .not { background: var(--kart); border-radius: 8px; padding: 12px; font-size: 14px; margin-top: 24px; }
-  footer { color: var(--soluk); font-size: 13px; padding: 24px 16px; text-align: center; }
-</style>
 </head>
 <body>
-<header>
-  <h1>Buluşma Noktası Önerileri</h1>
-  <p>Afet sonrası ailenizle buluşabileceğiniz açık alanlar</p>
-</header>
+<header class="ust"><div class="ic">
+  <a class="marka" href="/index.html"><img src="/img/icon.png" alt=""><strong>Güvendeyim</strong></a>
+  <button class="menu-dugme" type="button" aria-expanded="false" aria-controls="ana-menu">Menü</button>
+  <nav id="ana-menu" aria-label="Ana menü"><a href="/index.html">Ana sayfa</a><a href="/ozellikler.html">Özellikler</a><a href="/nasil-calisir.html">Nasıl çalışır</a><a href="/bulusma-noktasi.html" aria-current="page">Buluşma noktası</a><a href="/afete-hazirlik.html">Afete hazırlık</a><a href="/hakkinda.html">Hakkında</a><a href="/indir.html">İndir</a></nav>
+</div></header>
+<!--
+  Buluşma noktası önerileri sayfasının gövdesi. Üst menü, alt bilgi ve biçimler tanıtım sitesinden gelir:
+  guvendeyim.github.io deposundaki build.py bu dosyayı okuyup docs/index.html dosyasını üretir.
+  docs/index.html elle düzenlenmez.
+-->
 <main>
+<div class="sayfa-basi"><div class="ic">
+  <h1>Buluşma noktası önerileri</h1>
+  <p>Afet sonrası ailenizle buluşabileceğiniz açık alanlar. İl ve ilçe seçip haritada görün.</p>
+</div></div>
+<section><div class="ic">
   <div class="secim">
     <select id="il" aria-label="İl"><option value="">İl seçin</option></select>
     <select id="ilce" aria-label="İlçe" disabled><option value="">İlçe seçin</option></select>
   </div>
   <div id="harita"></div>
-  <div id="durum">Veri yükleniyor…</div>
-  <ul id="liste"></ul>
-  <div class="not">
+  <p id="durum" class="durum">Veri yükleniyor…</p>
+  <ul id="liste" class="oneriler"></ul>
+  <p class="uyari">
     Bu liste haritadaki park, meydan, pazar yeri, spor sahası ve oyun alanlarından otomatik üretilmiş
     <strong>öneridir</strong>; resmi bir belirleme ya da güvenlik garantisi değildir. Seçtiğiniz yerin
     binalardan uzak, açık ve ailenizin yürüyerek ulaşabileceği bir yer olduğunu kendiniz görün.
     İki nokta belirleyin: biri asıl, biri yedek.
-  </div>
+  </p>
+  <p class="kaynak">
+    Veri © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap katkıcıları</a> (ODbL) ·
+    <span id="surum"></span> · <a href="manifest.json">manifest.json</a> ·
+    <a href="https://github.com/guvendeyim/bulusma-noktalari">Kaynak ve biçim</a>
+  </p>
+</div></section>
 </main>
-<footer>
-  Veri © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap katkıcıları</a> (ODbL) ·
-  <span id="surum"></span> · <a href="manifest.json">manifest.json</a>
-</footer>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const TUR = { park: "Park", meydan: "Meydan", pazar_yeri: "Pazar yeri", spor_sahasi: "Spor sahası", oyun_alani: "Oyun alanı" };
@@ -101,7 +100,7 @@ $("ilce").onchange = async () => {
     const bag = document.createElement("a");
     bag.href = "geo:" + lat + "," + lng + "?q=" + lat + "," + lng;
     bag.textContent = "Haritada aç";
-    bag.onclick = (e) => { e.preventDefault(); harita.setView([lat, lng], 17); window.scrollTo({ top: 0, behavior: "smooth" }); };
+    bag.onclick = (e) => { e.preventDefault(); harita.setView([lat, lng], 17); $("harita").scrollIntoView({ behavior: "smooth", block: "center" }); };
     satir.append(sol, bag);
     $("liste").append(satir);
     L.circleMarker([lat, lng], { radius: 6, color: "#CE0539" }).bindPopup(baslik).addTo(isaretler);
@@ -109,6 +108,25 @@ $("ilce").onchange = async () => {
   harita.fitBounds(kayitlar.map((k) => [k[4], k[5]]), { padding: [24, 24], maxZoom: 16 });
   $("durum").textContent = kayitlar.length + " öneri";
 };
+</script>
+
+<footer><div class="ic">
+  <span>© AKUT Arama Kurtarma Derneği</span>
+  <nav aria-label="Alt menü">
+    <a href="https://www.akut.org.tr/guvendeyim-uygulamasi-gizlilik-politikasi">Gizlilik politikası</a>
+    <a href="mailto:guvendeyim@akut.org.tr">guvendeyim@akut.org.tr</a>
+    <a href="https://www.guvendeyim.org.tr/bulusma-noktalari/">Buluşma noktası önerileri</a>
+  </nav>
+</div></footer>
+<script>
+document.documentElement.classList.remove("betiksiz");
+(function () {
+  var dugme = document.querySelector(".menu-dugme"), menu = document.getElementById("ana-menu");
+  dugme.addEventListener("click", function () {
+    var acik = menu.classList.toggle("acik");
+    dugme.setAttribute("aria-expanded", acik);
+  });
+})();
 </script>
 </body>
 </html>
