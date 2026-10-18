@@ -3,7 +3,7 @@
 Kullanım: python3 tools/build_package.py data/bulusma_onerileri.sqlite docs 2026-10-08 [min_m2]
 
 Çıktı:
-  docs/manifest.json               sürüm, alan sırası, ilçe listesi (dosya, boyut, sha256, kayıt, kutu)
+  docs/manifest.json               sürüm (döküm tarihi), kontrol (son kontrol tarihi), ilçe listesi (dosya, boyut, sha256, kayıt, kutu)
   docs/il/<il>/<ilce>.geojson      GeoJSON FeatureCollection; her öneri bir Point,
                                    properties: tur, oncelik, ad, m2; id: OSM kimliği
 Dosyalar düz JSON'dur; sıkıştırmayı sunucu (GitHub Pages) aktarım sırasında yapar.
@@ -12,6 +12,7 @@ Uygulama ilçeyi adından değil kutusundan (min_lat, min_lng, max_lat, max_lng)
 ilçenin noktalarını da görür ve cihazda adres çözümleme gerekmez.
 Veri © OpenStreetMap katkıcıları (ODbL).
 """
+import datetime
 import hashlib
 import json
 import os
@@ -68,6 +69,7 @@ def main(db_path, out_dir, surum, min_m2=500):
     manifest = {
         "surum": surum,
         "min_m2": min_m2,
+        "kontrol": datetime.date.today().isoformat(),
         "bicim": "geojson",
         "atif": "© OpenStreetMap katkıcıları (ODbL)",
         "ilceler": ilceler,

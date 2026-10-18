@@ -46,7 +46,7 @@ let ilceler = [];
 
 fetch("manifest.json").then((r) => r.json()).then((m) => {
   ilceler = m.ilceler;
-  $("surum").textContent = "Sürüm " + m.surum + " · en az " + m.min_m2 + " m²";
+  $("surum").textContent = "Son güncelleme " + m.surum + (m.kontrol ? " · son kontrol " + m.kontrol : "") + " · en az " + m.min_m2 + " m²";
   [...new Set(ilceler.map((i) => i.il))].sort(tr.compare).forEach((il) => $("il").add(new Option(il, il)));
   $("durum").textContent = sayi.format(ilceler.reduce((t, i) => t + i.kayit, 0)) + " öneri, " + ilceler.length + " ilçe. İl ve ilçe seçin.";
 }).catch(() => { $("durum").textContent = "Veri yüklenemedi."; });

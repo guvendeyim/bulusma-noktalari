@@ -39,6 +39,24 @@ mkdir -p data && curl -L -o data/turkey-latest.osm.pbf https://download.geofabri
 python3 tools/build_package.py data/bulusma_onerileri.sqlite docs <dokum-tarihi>
 ```
 
+### Yeni veri var mı? (kontrol ve güncelleme)
+
+```bash
+sh tools/check_update.sh
+```
+
+Son dökümü `data/yeni/` altına indirir, paketi oraya üretir ve `tools/compare.py` ile yayındaki `docs/`
+paketiyle karşılaştırır. Fark varsa `docs/` yeni paketle değiştirilir; fark yoksa yalnızca
+`docs/manifest.json` içindeki `kontrol` tarihi güncellenir. Ardından `data/yeni/` silinir, rapor
+`data/rapor-<döküm tarihi>.txt` olarak kalır ve [`KONTROLLER.md`](KONTROLLER.md) dosyasına bir satır eklenir.
+Commit ve push elle yapılır. Web sayfası "son güncelleme" (`surum`, döküm tarihi) ile "son kontrol"
+(`kontrol`) tarihini manifest'ten gösterir.
+
+Rapor: toplamlar, türe göre sayılar, yeni / çıkan ilçeler, en çok değişen iller ve OSM kimliğine göre yeni,
+çıkan ve değişen öneriler. Yalnızca karşılaştırmak için `YAYIMLAMA=1 sh tools/check_update.sh` ya da
+`python3 tools/compare.py docs <paket klasörü>` (çıkış kodu 0 aynı, 1 farklı). Türkiye dökümü ~650 MB'dır;
+büyük makinede çalıştırılmalıdır.
+
 ## Web sayfası
 
 `docs/index.html` tanıtım sitesinin (`guvendeyim/guvendeyim.github.io`) menüsü ve düzeniyle üretilir, elle
