@@ -11,12 +11,13 @@
 <meta property="og:image" content="https://www.guvendeyim.org.tr/img/icon.png">
 <link rel="icon" type="image/png" href="/img/favicon.png">
 <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
-<link rel="stylesheet" href="/css/site.css?v=5da54194">
+<link rel="stylesheet" href="/css/site.css?v=bddb2c33">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 </head>
 <body>
 <header class="ust"><div class="ic">
-  <a class="marka" href="/index.html"><img src="/img/icon.png" alt=""><strong>Güvendeyim</strong></a>
+  <a class="marka notranslate" href="/index.html"><img src="/img/icon.png" alt=""><strong>Güvendeyim</strong></a>
+  <select class="dil notranslate" id="dil" aria-label="Dil / Language"><option value="tr" lang="tr">Türkçe</option><option value="en" lang="en">English</option><option value="de" lang="de">Deutsch</option><option value="az" lang="az">Azərbaycanca</option><option value="fa" lang="fa">فارسی</option><option value="ar" lang="ar">العربية</option><option value="ru" lang="ru">Русский</option><option value="uk" lang="uk">Українська</option><option value="fr" lang="fr">Français</option><option value="es" lang="es">Español</option></select>
   <button class="menu-dugme" type="button" aria-expanded="false" aria-controls="ana-menu">Menü</button>
   <nav id="ana-menu" aria-label="Ana menü"><a href="/index.html">Ana sayfa</a><a href="/ozellikler.html">Özellikler</a><a href="/nasil-calisir.html">Nasıl çalışır</a><a href="/bulusma-noktasi.html" aria-current="page">Buluşma noktası</a><a href="/afete-hazirlik.html">Afete hazırlık</a><a href="/hakkinda.html">Hakkında</a><a href="/indir.html">İndir</a></nav>
 </div></header>
@@ -125,6 +126,34 @@ document.documentElement.classList.remove("betiksiz");
   dugme.addEventListener("click", function () {
     var acik = menu.classList.toggle("acik");
     dugme.setAttribute("aria-expanded", acik);
+  });
+})();
+(function () {
+  var secim = document.getElementById("dil");
+  var m = document.cookie.match(/(?:^|; )googtrans=\/tr\/([^;]+)/);
+  var dil = m ? decodeURIComponent(m[1]) : "tr";
+  secim.value = dil;
+  if (dil !== "tr") {
+    document.documentElement.lang = dil;
+    if (dil === "ar" || dil === "fa") document.documentElement.dir = "rtl";
+    window.googleTranslateElementInit = function () {
+      new google.translate.TranslateElement({ pageLanguage: "tr", autoDisplay: false }, "google_translate_element");
+    };
+    var kutu = document.createElement("div");
+    kutu.id = "google_translate_element";
+    document.body.appendChild(kutu);
+    var betik = document.createElement("script");
+    betik.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+    document.body.appendChild(betik);
+  }
+  function cerez(deger, yasam) {
+    var alanlar = ["", "; domain=" + location.hostname, "; domain=." + location.hostname.replace(/^www\./, "")];
+    alanlar.forEach(function (alan) { document.cookie = "googtrans=" + deger + "; path=/" + alan + yasam; });
+  }
+  secim.addEventListener("change", function () {
+    if (secim.value === "tr") cerez("", "; expires=Thu, 01 Jan 1970 00:00:00 GMT");
+    else cerez("/tr/" + secim.value, "");
+    location.reload();
   });
 })();
 </script>
